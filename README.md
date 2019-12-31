@@ -1,4 +1,4 @@
-# react-webpack-typescript-starter
+# react-webpack-starter
 
 A frontend empty shell using React、Webpack、Babel、ESlint、Jest、Enzyme。
 
@@ -21,7 +21,7 @@ root-dir
 ## Usage
 
 ```
-git clone https://github.com/papan01/react-webpack-typescript-starter.git YourProjectName
+git clone https://github.com/papan01/react-webpack-starter.git YourProjectName
 cd YourPorjectName
 rm -rf .git # change to your repo.
 npm install
