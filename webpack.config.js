@@ -2,6 +2,8 @@ const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const Visualizer = require('webpack-visualizer-plugin');
 
 const ROOT_DIR = path.resolve(__dirname);
 const resolvePath = (...args) => path.resolve(ROOT_DIR, ...args);
@@ -20,6 +22,7 @@ module.exports = ({ mode }) => {
       new HtmlWebpackPlugin({
         title: '🐠🦍🐙',
         filename: 'index.html',
+        chunks: ['index', 'vender', 'commons', 'runtime'],
         template: resolvePath(SRC_DIR, 'templates/index.html'),
         meta: {
           viewport: 'width=device-width, initial-scale=1, shrink-to-fit=no',
@@ -33,6 +36,8 @@ module.exports = ({ mode }) => {
         filename: '[name].css',
         chunkFilename: '[id].css',
       }),
+      new BundleAnalyzerPlugin(),
+      new Visualizer(),
     ],
     output: {
       filename: isDev ? '[name].js' : '[name].[chunkhash:8].js',
@@ -98,7 +103,24 @@ module.exports = ({ mode }) => {
     devtool: isDev ? 'cheap-module-inline-source-map' : 'source-map',
     optimization: {
       splitChunks: {
-        chunks: 'all',
+        cacheGroups: {
+          // Split vendor code to its own chunk(s)
+          vendors: {
+            name: 'vendor',
+            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+            chunks: 'all',
+          },
+          // Split code common to all chunks to its own chunk
+          commons: {
+            name: 'commons', // The name of the chunk containing all common code
+            chunks: 'initial', // TODO: Document
+            minChunks: 2, // This is the number of modules
+          },
+        },
+      },
+      // The runtime should be in its own chunk
+      runtimeChunk: {
+        name: 'runtime',
       },
     },
   };
