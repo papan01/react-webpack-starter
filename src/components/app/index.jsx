@@ -1,5 +1,14 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
-export default function App() {
-  return <h1>Hello World</h1>;
-}
+const Appointment = ({ customer }) => {
+  return <div>{customer.firstName}</div>;
+};
+
+Appointment.propTypes = {
+  customer: PropTypes.shape({
+    firstName: PropTypes.string,
+  }).isRequired,
+};
+
+export default Appointment;
