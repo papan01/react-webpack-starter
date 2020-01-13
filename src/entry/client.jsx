@@ -1,5 +1,10 @@
 import React from 'react';
 import { render } from 'react-dom';
-import App from '../components/app/index';
+import AppointmentsDayView from '../components/appointmentsDayView';
+import sampleAppointments from './sampleData';
+import './style.css';
 
-render(<App />, document.getElementById('app'));
+render(
+  <AppointmentsDayView appointments={sampleAppointments} />,
+  document.getElementById('app'),
+);

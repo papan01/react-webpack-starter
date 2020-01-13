@@ -22,7 +22,7 @@ module.exports = ({ mode }) => {
       new HtmlWebpackPlugin({
         title: '🐠🦍🐙',
         filename: 'index.html',
-        chunks: ['index', 'vender', 'commons', 'runtime'],
+        chunks: ['client', 'vendor', 'commons', 'runtime'],
         template: resolvePath(SRC_DIR, 'templates/index.html'),
         meta: {
           viewport: 'width=device-width, initial-scale=1, shrink-to-fit=no',
