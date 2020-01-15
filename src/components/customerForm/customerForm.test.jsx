@@ -11,6 +11,29 @@ describe('CustomerForm', () => {
   const field = name => form('customer').elements[name];
   const labelFor = formElement => container.querySelector(`label[for="${formElement}"]`);
 
+  const spy = () => {
+    let receivedArguments;
+    return {
+      fn: (...args) => {
+        receivedArguments = args;
+      },
+      receivedArguments: () => receivedArguments,
+      receivedArgument: n => receivedArguments[n],
+    };
+  };
+
+  expect.extend({
+    toHaveBeenCalled(received) {
+      if (received.receivedArguments() === undefined) {
+        return {
+          pass: false,
+          message: () => 'Spy was not called.',
+        };
+      }
+      return { pass: true, message: () => 'Spy was called.' };
+    },
+  });
+
   const itRendersAsATextBox = fieldName => {
     it('renders as a text box', () => {
       render(<CustomerForm />);
@@ -44,9 +67,11 @@ describe('CustomerForm', () => {
 
   const itSubmitsExistingValue = (fieldName, value) => {
     it('saves existing value when submitted', async () => {
-      expect.hasAssertions();
-      render(<CustomerForm {...{ [fieldName]: value }} onSubmit={props => expect(props[fieldName]).toEqual(value)} />);
-      await ReactTestUtils.Simulate.submit(form('customer'));
+      const fetchSpy = spy();
+      render(<CustomerForm {...{ [fieldName]: value }} fetch={fetchSpy.fn} onSubmit={() => {}} />);
+      ReactTestUtils.Simulate.submit(form('customer'));
+      const fetchOpts = fetchSpy.receivedArgument(1);
+      expect(JSON.parse(fetchOpts.body)[fieldName]).toEqual(value);
     });
   };
 
@@ -79,6 +104,20 @@ describe('CustomerForm', () => {
     render(<CustomerForm />);
     const submitButton = container.querySelector('input[type="submit"]');
     expect(submitButton).not.toBeNull();
+  });
+
+  it('calls fetch with the right properties when submitting data', async () => {
+    const fetchSpy = spy();
+    render(<CustomerForm fetch={fetchSpy.fn} onSubmit={() => {}} />);
+    ReactTestUtils.Simulate.submit(form('customer'));
+    expect(fetchSpy).toHaveBeenCalled();
+    expect(fetchSpy.receivedArgument(0)).toEqual('/customers');
+    const fetchOpts = fetchSpy.receivedArgument(1);
+    expect(fetchOpts.method).toEqual('POST');
+    expect(fetchOpts.credentials).toEqual('same-origin');
+    expect(fetchOpts.headers).toEqual({
+      'Content-Type': 'application/json',
+    });
   });
 
   describe('first name field', () => {
