@@ -13,8 +13,7 @@ describe('Appointment', () => {
   let appointmentTable;
   beforeEach(() => {
     container = document.createElement('div');
-    appointmentTable = () =>
-      container.querySelector('#appointmentView > table');
+    appointmentTable = () => container.querySelector('#appointmentView > table');
   });
 
   it('renders a table', () => {
@@ -122,9 +121,7 @@ describe('AppointmentsDayView', () => {
 
   it('initially shows a message saying there are no appointments today', () => {
     render(<AppointmentsDayView appointments={[]} />);
-    expect(container.textContent).toMatch(
-      'There are no appointments scheduled for today',
-    );
+    expect(container.textContent).toMatch('There are no appointments scheduled for today');
   });
 
   it('selects the first appointment by default', () => {
