@@ -2,24 +2,36 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-const CustomerForm = ({ firstName, lastName, phoneNumber, onSubmit, fetch }) => {
+const Error = () => {
+  return <div className="error">An error occurred during save.</div>;
+};
+
+const CustomerForm = ({ firstName, lastName, phoneNumber, onSave }) => {
   const [customer, setCustomer] = useState({
     firstName,
     lastName,
     phoneNumber,
   });
+  const [error, setError] = useState(false);
   const handleChange = ({ target }) => setCustomer(obj => ({ ...obj, [target.name]: target.value }));
-  const handleSubmit = () => {
-    onSubmit(customer);
-    fetch('/customers', {
+  const handleSubmit = async event => {
+    event.preventDefault();
+    const result = await window.fetch('/customers', {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(customer),
     });
+    if (result.ok) {
+      const customerWithId = await result.json();
+      onSave(customerWithId);
+    } else {
+      setError(true);
+    }
   };
   return (
     <form id="customer" onSubmit={handleSubmit}>
+      {error ? <Error /> : null}
       <label htmlFor="firstName">First name</label>
       <input id="firstName" type="text" name="firstName" value={firstName} onChange={handleChange} />
       <label htmlFor="lastName">Last name</label>
@@ -35,16 +47,14 @@ CustomerForm.propTypes = {
   firstName: PropTypes.string,
   lastName: PropTypes.string,
   phoneNumber: PropTypes.string,
-  onSubmit: PropTypes.func,
-  fetch: PropTypes.func,
+  onSave: PropTypes.func,
 };
 
 CustomerForm.defaultProps = {
   firstName: '',
   lastName: '',
   phoneNumber: '',
-  onSubmit: () => {},
-  fetch: async () => {},
+  onSave: () => {},
 };
 
 export default CustomerForm;
