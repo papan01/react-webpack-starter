@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactTestUtils, { act } from 'react-dom/test-utils';
 import createContainer from '../../utils/test/domManipulators';
+import fetchResponseOk, { fetchResponseError, requestBodyOf } from '../../utils/test/spyHelpers';
 import CustomerForm from './index';
 
 describe('CustomerForm', () => {
@@ -12,15 +13,20 @@ describe('CustomerForm', () => {
   const field = name => form('customer').elements[name];
   const labelFor = formElement => container.querySelector(`label[for="${formElement}"]`);
 
-  const fetchRequestBody = () => JSON.parse(fetchSpy.mock.calls[0][1].body);
+  beforeEach(() => {
+    ({ render, container } = createContainer());
+    fetchSpy = jest.fn(() => fetchResponseOk({}));
+    window.fetch = fetchSpy;
+  });
 
-  const fetchResponseOk = body =>
-    Promise.resolve({
-      ok: true,
-      json: () => Promise.resolve(body),
-    });
+  afterEach(() => {
+    window.fetch = originalFetch;
+  });
 
-  const fetchResponseError = () => Promise.resolve({ ok: false });
+  it('renders a form', () => {
+    render(<CustomerForm />);
+    expect(form('customer')).not.toBeNull();
+  });
 
   const itRendersAsATextBox = fieldName => {
     it('renders as a text box', () => {
@@ -57,7 +63,7 @@ describe('CustomerForm', () => {
     it('saves existing value when submitted', async () => {
       render(<CustomerForm {...{ [fieldName]: value }} />);
       ReactTestUtils.Simulate.submit(form('customer'));
-      expect(fetchRequestBody()).toMatchObject({
+      expect(requestBodyOf(fetchSpy)).toMatchObject({
         [fieldName]: value,
       });
     });
@@ -70,26 +76,11 @@ describe('CustomerForm', () => {
         target: { value, name: fieldName },
       });
       await ReactTestUtils.Simulate.submit(form('customer'));
-      expect(fetchRequestBody()).toMatchObject({
+      expect(requestBodyOf(fetchSpy)).toMatchObject({
         [fieldName]: value,
       });
     });
   };
-
-  beforeEach(() => {
-    ({ render, container } = createContainer());
-    fetchSpy = jest.fn(() => fetchResponseOk({}));
-    window.fetch = fetchSpy;
-  });
-
-  afterEach(() => {
-    window.fetch = originalFetch;
-  });
-
-  it('renders a form', () => {
-    render(<CustomerForm />);
-    expect(form('customer')).not.toBeNull();
-  });
 
   it('has a submit button', () => {
     render(<CustomerForm />);
