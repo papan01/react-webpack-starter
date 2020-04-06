@@ -15,14 +15,14 @@ module.exports = ({ mode }) => {
   return {
     mode,
     entry: {
-      client: resolvePath(SRC_DIR, 'entry/client.jsx'),
+      index: resolvePath(SRC_DIR, 'entry/index.jsx'),
     },
     plugins: [
       new CleanWebpackPlugin(),
       new HtmlWebpackPlugin({
         title: '🐠🦍🐙',
         filename: 'index.html',
-        chunks: ['client', 'vendor', 'commons', 'runtime'],
+        chunks: ['index', 'vendor', 'commons', 'runtime'],
         template: resolvePath(SRC_DIR, 'templates/index.html'),
         meta: {
           viewport: 'width=device-width, initial-scale=1, shrink-to-fit=no',
